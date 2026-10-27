@@ -42,6 +42,48 @@ export default function EditBikePage() {
   const [featured, setFeatured] = useState<boolean>(false);
   const [images, setImages] = useState<string[]>([]);
   const [customImageUrl, setCustomImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.urls && data.urls.length > 0) {
+          setImages((prev) => [...data.urls, ...prev]);
+          return;
+        }
+      }
+    } catch (err: any) {
+      console.error('Image upload error:', err);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleAddImageUrl = () => {
+    if (customImageUrl.trim()) {
+      setImages((prev) => [customImageUrl.trim(), ...prev]);
+      setCustomImageUrl('');
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   useEffect(() => {
     async function loadBike() {
@@ -337,6 +379,71 @@ export default function EditBikePage() {
               <label htmlFor="featured" className="text-xs text-white font-bold cursor-pointer">
                 Featured Flagship on Homepage
               </label>
+            </div>
+
+            {/* Image Upload & Management */}
+            <div className="space-y-3 pt-2">
+              <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
+                Bike Gallery Images:
+              </label>
+
+              {/* Upload Button */}
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <label className="w-full sm:w-auto bg-[#1C1C1C] hover:bg-[#252525] border border-dashed border-[#444] hover:border-electric text-white text-xs font-bold px-4 py-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all">
+                  <Upload className="w-4 h-4 text-electric" />
+                  <span>{uploadingImage ? 'Uploading...' : 'Upload Photos (Supabase Cloud)'}</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    disabled={uploadingImage}
+                    className="hidden"
+                  />
+                </label>
+
+                {/* Custom URL Input */}
+                <div className="flex-1 flex gap-2 w-full">
+                  <input
+                    type="url"
+                    placeholder="Or paste external image URL..."
+                    value={customImageUrl}
+                    onChange={(e) => setCustomImageUrl(e.target.value)}
+                    className="flex-1 bg-[#181818] border border-[#2B2B2B] focus:border-electric rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddImageUrl}
+                    className="bg-[#222] hover:bg-[#333] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Image Previews */}
+              {images.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                  {images.map((img, idx) => (
+                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-[#262626] aspect-video bg-black">
+                      <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(idx)}
+                        className="absolute top-1.5 right-1.5 bg-red-600/90 hover:bg-red-700 text-white p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove photo"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      {idx === 0 && (
+                        <span className="absolute bottom-1 left-1 bg-black/80 text-electric text-[9px] font-bold px-1.5 py-0.5 rounded">
+                          Cover
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="pt-2">
