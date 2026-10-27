@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "action": "price_changed",
+    "item_name": "AIMIT BMX",
+    "details": "Price adjusted to GHS 5000. Hubtel alert fired.",
+    "id": "act-vjstz",
+    "created_at": "2026-10-27T23:26:27.732Z"
+  },
+  {
+    "action": "price_changed",
+    "item_name": "electric BMX",
+    "details": "Price adjusted to GHS 100. Hubtel alert fired.",
+    "id": "act-pxsp1",
+    "created_at": "2026-10-27T23:25:34.614Z"
+  },
+  {
+    "action": "bike_created",
+    "item_name": "AIMIT BMX",
+    "details": "Added new model to inventory (GHS 12000, Stock: 5)",
+    "id": "act-kzyts",
+    "created_at": "2026-10-27T23:24:01.773Z"
+  },
+  {
+    "id": "act-2uv96",
+    "action": "new_order",
+    "item_name": "Order #ord-T9KT",
+    "details": "Status updated to CONFIRMED",
+    "created_at": "2026-10-27T23:23:22.194+00:00"
+  },
+  {
+    "id": "log-ihopo",
+    "action": "new_order",
+    "item_name": "Order #ord-T9KTZX",
+    "details": "Jeff Gyamfi Boakye ordered for Tamale Regional Hub (GHS 11249)",
+    "created_at": "2026-10-27T23:22:57.169+00:00"
+  },
+  {
+    "id": "act-wjs4o",
+    "action": "new_order",
+    "item_name": "Order #ord-T9KTZX",
+    "details": "Jeff Gyamfi Boakye ordered for Tamale Regional Hub (GHS 11249)",
+    "created_at": "2026-10-27T23:22:56.785+00:00"
+  }
+]

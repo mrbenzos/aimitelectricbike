@@ -1,11 +1,40 @@
 [
   {
+    "id": "bike-c3c9vp8",
+    "slug": "aimit-bmx",
+    "model_name": "AIMIT BMX",
+    "short_desc": "wasyh",
+    "full_desc": "JAMnzj",
+    "price": 5000,
+    "promo_price": 392,
+    "battery_type": "48V 15Ah LG Removable Lithium-Ion",
+    "range_km": 85,
+    "max_speed_kmh": 45,
+    "charge_time_hrs": 5,
+    "motor_watts": 750,
+    "weight_kg": 26,
+    "warranty_months": 12,
+    "images": [
+      "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=1200&auto=format&fit=crop"
+    ],
+    "category": "offroad",
+    "stock_qty": 5,
+    "stock_status": "in_stock",
+    "featured": false,
+    "video_url": null,
+    "video_title": null,
+    "video_duration": null,
+    "terrain_rating": null,
+    "created_at": "2026-10-27T23:24:01.03+00:00",
+    "updated_at": "2026-10-27T23:26:25.882+00:00"
+  },
+  {
     "id": "bike-yveiqdj",
     "slug": "electric-bmx",
     "model_name": "electric BMX",
     "short_desc": "snjNjas",
     "full_desc": "wqnsajnjwns",
-    "price": 12000,
+    "price": 100,
     "promo_price": 10999,
     "battery_type": "48V 15Ah LG Removable Lithium-Ion",
     "range_km": 85,
@@ -29,7 +58,7 @@
     "video_duration": null,
     "terrain_rating": null,
     "created_at": "2026-09-20T01:33:33.113+00:00",
-    "updated_at": "2026-10-26T21:20:52.184+00:00"
+    "updated_at": "2026-10-27T23:25:33.145+00:00"
   },
   {
     "id": "b3-cargo-hauler",
