@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { readBikesFromFile, writeBikesToFile } from '@/lib/serverStore';
-import { isSupabaseConfigured, supabase } from '@/lib/supabaseClient';
+import { isSupabaseConfigured, supabase, supabaseAdmin } from '@/lib/supabaseClient';
 import { slugify } from '@/lib/utils';
 import { Bike } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -10,21 +13,13 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     const cleanSlug = decodeURIComponent(rawSlug).toLowerCase().trim();
     const slugifiedQuery = slugify(cleanSlug);
 
-    const bikes = readBikesFromFile();
-    let found = bikes.find(
-      (b) =>
-        b.slug === rawSlug ||
-        b.slug.toLowerCase() === cleanSlug ||
-        b.slug === slugifiedQuery ||
-        slugify(b.slug) === slugifiedQuery ||
-        slugify(b.model_name) === slugifiedQuery ||
-        b.id === rawSlug ||
-        b.id.toLowerCase() === cleanSlug
-    );
+    const client = supabaseAdmin || supabase;
+    let found: Bike | null = null;
 
-    if (!found && isSupabaseConfigured && supabase) {
+    // 1. Check Supabase first
+    if (isSupabaseConfigured && client) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await client
           .from('bikes')
           .select('*')
           .or(`slug.eq.${rawSlug},slug.eq.${cleanSlug},slug.eq.${slugifiedQuery},id.eq.${rawSlug}`)
@@ -36,6 +31,22 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       } catch (sbErr) {
         console.warn('Supabase fetch single bike warning:', sbErr);
       }
+    }
+
+    // 2. Fallback to local file store
+    if (!found) {
+      const bikes = readBikesFromFile();
+      const match = bikes.find(
+        (b) =>
+          b.slug === rawSlug ||
+          b.slug.toLowerCase() === cleanSlug ||
+          b.slug === slugifiedQuery ||
+          slugify(b.slug) === slugifiedQuery ||
+          slugify(b.model_name) === slugifiedQuery ||
+          b.id === rawSlug ||
+          b.id.toLowerCase() === cleanSlug
+      );
+      if (match) found = match;
     }
 
     if (!found) {
@@ -56,23 +67,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       body.slug = slugify(body.slug);
     }
 
-    const bikes = readBikesFromFile();
-    const idx = bikes.findIndex((b) => b.id === params.id || b.slug === params.id);
+    const client = supabaseAdmin || supabase;
     let updatedBike: Bike | null = null;
 
-    if (idx !== -1) {
-      bikes[idx] = {
-        ...bikes[idx],
-        ...body,
-        updated_at: new Date().toISOString(),
-      };
-      updatedBike = bikes[idx];
-      writeBikesToFile(bikes);
-    }
-
-    if (isSupabaseConfigured && supabase) {
+    // 1. Update in Supabase
+    if (isSupabaseConfigured && client) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await client
           .from('bikes')
           .update({ ...body, updated_at: new Date().toISOString() })
           .eq('id', params.id)
@@ -86,6 +87,21 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       }
     }
 
+    // 2. Update local file store
+    try {
+      const bikes = readBikesFromFile();
+      const idx = bikes.findIndex((b) => b.id === params.id || b.slug === params.id);
+      if (idx !== -1) {
+        bikes[idx] = {
+          ...bikes[idx],
+          ...body,
+          updated_at: new Date().toISOString(),
+        };
+        if (!updatedBike) updatedBike = bikes[idx];
+        writeBikesToFile(bikes);
+      }
+    } catch (e) {}
+
     if (!updatedBike) {
       return NextResponse.json({ error: 'Bike not found' }, { status: 404 });
     }
@@ -97,20 +113,26 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    const bikes = readBikesFromFile();
-    const initialLen = bikes.length;
-    const filtered = bikes.filter((b) => b.id !== params.id && b.slug !== params.id);
-    writeBikesToFile(filtered);
+    const client = supabaseAdmin || supabase;
 
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && client) {
       try {
-        await supabase.from('bikes').delete().eq('id', params.id);
+        await client.from('bikes').delete().eq('id', params.id);
       } catch (sbErr) {
         console.warn('Supabase delete bike warning:', sbErr);
       }
     }
 
-    return NextResponse.json({ success: filtered.length < initialLen });
+    let deletedLocally = false;
+    try {
+      const bikes = readBikesFromFile();
+      const initialLen = bikes.length;
+      const filtered = bikes.filter((b) => b.id !== params.id && b.slug !== params.id);
+      writeBikesToFile(filtered);
+      deletedLocally = filtered.length < initialLen;
+    } catch (e) {}
+
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to delete bike' }, { status: 500 });
   }

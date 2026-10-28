@@ -67,10 +67,14 @@ export const dbService = {
       }
     }
 
-    if (isSupabaseConfigured && supabase) {
+    const client = supabaseAdmin || supabase;
+    if (isSupabaseConfigured && client) {
       try {
-        const { data, error } = await supabase.from('bikes').select('*').order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) return data as Bike[];
+        const { data, error } = await client.from('bikes').select('*').order('created_at', { ascending: false });
+        if (!error && data && data.length > 0) {
+          globalForApp.memoryBikes = data as Bike[];
+          return data as Bike[];
+        }
       } catch (e) {}
     }
 

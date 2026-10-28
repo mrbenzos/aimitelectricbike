@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Zap, ShieldCheck, BatteryCharging, Truck, Award, ArrowRight, Flame } from 'lucide-react';
-import { readBikesFromFile } from '@/lib/serverStore';
+import { dbService } from '@/lib/supabaseClient';
 import BikeCard from '@/components/BikeCard';
 import FuelCalculator from '@/components/FuelCalculator';
 import RangeTable from '@/components/RangeTable';
@@ -9,10 +9,11 @@ import GhanaHubsMap from '@/components/GhanaHubsMap';
 import { createWhatsAppLink } from '@/lib/utils';
 import CollapsibleSection from '@/components/CollapsibleSection';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Dynamic, always fresh
 
 export default async function HomePage() {
-  const bikes = readBikesFromFile();
+  const bikes = await dbService.getBikes();
   const featuredBikes = bikes.filter((b) => b.featured);
   const remainingBikes = bikes.filter((b) => !b.featured);
 

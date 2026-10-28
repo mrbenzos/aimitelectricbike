@@ -1,10 +1,10 @@
 import { MetadataRoute } from 'next';
-import { readBikesFromFile } from '@/lib/serverStore';
+import { dbService } from '@/lib/supabaseClient';
 
 const BASE_URL = 'https://aimitelectricbike.com';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const bikes = readBikesFromFile();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const bikes = await dbService.getBikes();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },

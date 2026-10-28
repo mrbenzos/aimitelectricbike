@@ -1,12 +1,34 @@
 import { NextResponse } from 'next/server';
 import { readOrdersFromFile, writeOrdersToFile, readBikesFromFile } from '@/lib/serverStore';
-import { isSupabaseConfigured, supabase } from '@/lib/supabaseClient';
+import { isSupabaseConfigured, supabase, supabaseAdmin } from '@/lib/supabaseClient';
 import { Order } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   try {
-    const fileOrders = readOrdersFromFile();
+    const client = supabaseAdmin || supabase;
+    let fileOrders = readOrdersFromFile();
     const bikes = readBikesFromFile();
+
+    if (isSupabaseConfigured && client) {
+      try {
+        const { data, error } = await client
+          .from('orders')
+          .select('*, bike:bikes(*)')
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          try {
+            writeOrdersToFile(data as Order[]);
+          } catch (e) {}
+          return NextResponse.json(data as Order[]);
+        }
+      } catch (sbErr) {
+        console.warn('Supabase orders fetch warning:', sbErr);
+      }
+    }
 
     // Attach bike object if missing
     const enrichedOrders = fileOrders.map((order) => {
@@ -16,29 +38,6 @@ export async function GET() {
       }
       return order;
     });
-
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*, bike:bikes(*)')
-          .order('created_at', { ascending: false });
-
-        if (!error && data && data.length > 0) {
-          const mergedMap = new Map<string, Order>();
-          enrichedOrders.forEach((o) => mergedMap.set(o.id, o));
-          (data as Order[]).forEach((o) => mergedMap.set(o.id, o));
-
-          const mergedList = Array.from(mergedMap.values()).sort(
-            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-          writeOrdersToFile(mergedList);
-          return NextResponse.json(mergedList);
-        }
-      } catch (sbErr) {
-        console.warn('Supabase orders fetch warning:', sbErr);
-      }
-    }
 
     return NextResponse.json(enrichedOrders);
   } catch (err: any) {
@@ -54,27 +53,37 @@ export async function POST(req: Request) {
 
     const newOrder: Order = {
       ...body,
-      id: 'ord-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+      id: body.id || 'ord-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
       created_at: new Date().toISOString(),
       bike: foundBike || undefined,
     };
 
-    // Save directly to disk file store
-    const currentOrders = readOrdersFromFile();
-    const updatedOrders = [newOrder, ...currentOrders.filter((o) => o.id !== newOrder.id)];
-    writeOrdersToFile(updatedOrders);
+    const client = supabaseAdmin || supabase;
 
     // Sync to Supabase if configured
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && client) {
       try {
-        const { data, error } = await supabase.from('orders').insert([newOrder]).select().single();
+        const { data, error } = await client.from('orders').insert([newOrder]).select().single();
         if (!error && data) {
+          try {
+            const currentOrders = readOrdersFromFile();
+            writeOrdersToFile([data as Order, ...currentOrders.filter((o) => o.id !== data.id)]);
+          } catch (e) {}
           return NextResponse.json(data as Order, { status: 201 });
+        } else if (error) {
+          console.warn('Supabase order insert error:', error);
         }
       } catch (sbErr) {
-        console.warn('Supabase order insert skipped, saved to disk:', sbErr);
+        console.warn('Supabase order insert skipped:', sbErr);
       }
     }
+
+    // Save to disk file store
+    try {
+      const currentOrders = readOrdersFromFile();
+      const updatedOrders = [newOrder, ...currentOrders.filter((o) => o.id !== newOrder.id)];
+      writeOrdersToFile(updatedOrders);
+    } catch (e) {}
 
     return NextResponse.json(newOrder, { status: 201 });
   } catch (err: any) {

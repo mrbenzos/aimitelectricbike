@@ -1,5 +1,54 @@
 [
   {
+    "customer_name": "Pius Asante",
+    "customer_phone": "0538973984",
+    "customer_location": "takoradi",
+    "delivery_hub": "Tamale Regional Hub",
+    "bike_id": "b2-volt-commuter",
+    "quantity": 1,
+    "total_price": 9200,
+    "status": "pending",
+    "payment_type": "Mobile Money (MTN / Telecel)",
+    "id": "ord-GJMVAJ",
+    "created_at": "2026-10-28T00:01:35.925Z",
+    "bike": {
+      "id": "b2-volt-commuter",
+      "slug": "aimit-volt-commuter-x1",
+      "model_name": "AIMIT Volt Commuter X1",
+      "short_desc": "Sleek, ultra-efficient urban e-bike designed for Accra traffic, student commutes, and dispatch riders seeking zero fuel costs.",
+      "full_desc": "Say goodbye to trotro queues and skyrocketing fuel costs. The AIMIT Volt Commuter X1 features an aircraft-grade aluminum alloy frame, Shimano 7-speed transmission, integrated LED headlight and tail indicators, and a removable 48V 13Ah lithium battery that charges fully for less than GHS 2.00 on Ghana Grid electricity. Features phone charging USB port on the digital LCD dashboard.",
+      "price": 9800,
+      "promo_price": 8950,
+      "battery_type": "48V 13Ah Panasonic Removable Lithium-Ion",
+      "range_km": 75,
+      "max_speed_kmh": 42,
+      "charge_time_hrs": 4.5,
+      "motor_watts": 500,
+      "weight_kg": 22,
+      "warranty_months": 12,
+      "images": [
+        "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?q=80&w=1200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=1200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=1200&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=1200&auto=format&fit=crop"
+      ],
+      "category": "city",
+      "stock_qty": 12,
+      "stock_status": "in_stock",
+      "featured": true,
+      "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+      "video_title": "AIMIT Volt Commuter X1 — Accra Rush-Hour Gridlock Bypass & Speed Test",
+      "video_duration": "0:15 Demo",
+      "terrain_rating": {
+        "hill_climb": "Up to 25° Incline",
+        "water_rating": "IP65 All-Weather Sealed",
+        "pothole_score": 9.4
+      },
+      "created_at": "2026-09-17T01:30:17.77+00:00",
+      "updated_at": "2026-10-27T23:19:18.09411+00:00"
+    }
+  },
+  {
     "customer_name": "Jeff Gyamfi Boakye",
     "customer_phone": "0538973984",
     "customer_location": "takoradi",
