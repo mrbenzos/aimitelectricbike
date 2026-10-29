@@ -42,20 +42,40 @@ export default function AdminBikesPage() {
   };
 
   const handleDeleteBike = async (id: string, modelName: string) => {
-    if (!confirm(`Are you sure you want to delete ${modelName}? This will trigger an SMS alert to the owner.`)) {
+    if (!confirm(`Are you sure you want to delete ${modelName}?`)) {
       return;
     }
 
     try {
-      await dbService.deleteBike(id);
-      // Trigger Hubtel SMS Alert:
-      await alertBikeAction(modelName, 'deleted');
-      await dbService.logActivity('deleted', modelName, `Bike deleted by admin. Hubtel SMS fired.`);
-      setActionFeedback(`Deleted ${modelName}. SMS alert sent to owner.`);
-      loadBikes();
-    } catch (err) {
+      const res = await fetch(`/api/bikes/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Server could not delete bike');
+      }
+
+      // Optimistic instant UI removal
+      setBikes((prev) => prev.filter((b) => b.id !== id && b.slug !== id));
+      setActionFeedback(`Deleted ${modelName}.`);
+
+      // Safe non-blocking activity log
+      try {
+        await dbService.logActivity('deleted', modelName, `Bike deleted by admin.`);
+      } catch (e) {}
+
+      // Safe non-blocking SMS alert
+      try {
+        await alertBikeAction(modelName, 'deleted');
+      } catch (e) {
+        console.warn('SMS alert skipped:', e);
+      }
+
+      await loadBikes();
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to delete bike');
+      alert('Failed to delete bike: ' + (err.message || ''));
     }
   };
 
@@ -65,13 +85,19 @@ export default function AdminBikesPage() {
         stock_status: 'sold_out',
         stock_qty: 0,
       });
-      // Trigger Hubtel SMS Alert:
-      await alertBikeAction(bike.model_name, 'sold_out');
-      await dbService.logActivity('sold', bike.model_name, `Marked sold out by admin. SMS alert fired.`);
-      setActionFeedback(`Marked ${bike.model_name} as Sold Out. SMS alert sent to owner.`);
-      loadBikes();
-    } catch (err) {
+
+      setActionFeedback(`Marked ${bike.model_name} as Sold Out.`);
+
+      // Safe non-blocking activity log & SMS
+      try {
+        await dbService.logActivity('sold', bike.model_name, `Marked sold out by admin.`);
+        await alertBikeAction(bike.model_name, 'sold_out');
+      } catch (e) {}
+
+      await loadBikes();
+    } catch (err: any) {
       console.error(err);
+      alert('Failed to update status: ' + (err.message || ''));
     }
   };
 

@@ -140,10 +140,6 @@ export default function Footer() {
               <Link href="/legal/cookies" className="text-xs text-slate-500 hover:text-emerald-600 transition-colors">Cookies Policy</Link>
             </div>
             <div className="flex items-center space-x-6">
-              <Link href="/admin/login" className="hover:text-emerald-600 transition-colors">
-                Admin 2FA Login
-              </Link>
-              <span>•</span>
               <Link href="/why-electric" className="hover:text-emerald-600 transition-colors">
                 Battery Care Guide
               </Link>

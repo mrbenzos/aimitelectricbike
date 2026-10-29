@@ -54,12 +54,30 @@ export async function sendAlertSMS({
   message,
   senderId,
 }: SendSMSOptions): Promise<HubtelSMSResult> {
+  const defaultSender = process.env.SENDER_ID || 'AIMIT E-BIKE';
+  const finalSender = senderId || defaultSender;
+  const formattedPhone = formatGhanaPhone(to);
+
+  // If running on client, proxy to server API to prevent browser CORS errors
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch('/api/sms/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: formattedPhone, message, senderId: finalSender }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('Client SMS dispatch skipped:', e);
+    }
+    return { success: true, status: 'CLIENT_DISPATCHED', provider: 'vynfy' };
+  }
+
   const vynfyApiKey = process.env.VYNFY_API_KEY;
   const hubtelClientId = process.env.HUBTEL_CLIENT_ID;
   const hubtelClientSecret = process.env.HUBTEL_CLIENT_SECRET;
-  const defaultSender = process.env.SENDER_ID || 'AIMIT EBIKE';
-  const finalSender = senderId || defaultSender;
-  const formattedPhone = formatGhanaPhone(to);
 
   // 1. PRIMARY PROVIDER: VYNFY SMS API
   if (vynfyApiKey) {
@@ -227,7 +245,7 @@ async function sendAdminBroadcast(message: string) {
       sendAlertSMS({
         to: phone,
         message,
-        senderId: 'AIMIT EBIKE',
+        senderId: 'AIMIT E-BIKE',
       })
     )
   );
@@ -237,7 +255,7 @@ async function sendAdminBroadcast(message: string) {
  * 1. On bike stock_qty <= 2
  */
 export async function alertLowStock(modelName: string, qtyLeft: number) {
-  const message = `LOW STOCK ALERT: AIMIT ${modelName} only ${qtyLeft} left in stock. Restock required. - AIMIT EBIKE`;
+  const message = `LOW STOCK ALERT: AIMIT ${modelName} only ${qtyLeft} left in stock. Restock required. - AIMIT E-BIKE`;
   const results = await sendAdminBroadcast(message);
   return results[0];
 }
@@ -247,7 +265,7 @@ export async function alertLowStock(modelName: string, qtyLeft: number) {
  */
 export async function alertBikeAction(modelName: string, action: string) {
   const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  const message = `AIMIT EBIKE INVENTORY: ${modelName} marked ${action} by Admin at ${time}. - AIMIT EBIKE`;
+  const message = `AIMIT E-BIKE INVENTORY: ${modelName} marked ${action} by Admin at ${time}. - AIMIT E-BIKE`;
   const results = await sendAdminBroadcast(message);
   return results[0];
 }
@@ -264,12 +282,12 @@ export async function alertNewOrder(orderData: {
   totalPrice: number;
 }) {
   // SMS to Store Admins
-  const adminMsg = `NEW ORDER: ${orderData.modelName} x${orderData.qty} to ${orderData.deliveryHub} | Customer: ${orderData.customerName} (${orderData.customerPhone}) | Total: GHS ${orderData.totalPrice}. - AIMIT EBIKE`;
+  const adminMsg = `NEW ORDER: ${orderData.modelName} x${orderData.qty} to ${orderData.deliveryHub} | Customer: ${orderData.customerName} (${orderData.customerPhone}) | Total: GHS ${orderData.totalPrice}. - AIMIT E-BIKE`;
   const adminPromise = sendAdminBroadcast(adminMsg);
 
   // SMS to Customer
-  const customerSender = process.env.SENDER_ID_CUSTOMER || 'AIMIT EBIKE';
-  const customerMsg = `Hello ${orderData.customerName}, your order for ${orderData.modelName} (Delivery to ${orderData.deliveryHub}) has been received! Our hub representative will call you shortly. - AIMIT EBIKE`;
+  const customerSender = process.env.SENDER_ID_CUSTOMER || 'AIMIT E-BIKE';
+  const customerMsg = `Hello ${orderData.customerName}, your order for ${orderData.modelName} (Delivery to ${orderData.deliveryHub}) has been received! Our hub representative will call you shortly. - AIMIT E-BIKE`;
   const customerPromise = sendAlertSMS({
     to: orderData.customerPhone,
     message: customerMsg,
@@ -290,7 +308,7 @@ export async function alertNewTestRide(data: {
   date: string;
   bikeInterest?: string;
 }) {
-  const message = `NEW TEST RIDE: ${data.customerName} (${data.customerPhone}) booked at ${data.hub} on ${data.date} for ${data.bikeInterest || 'AIMIT E-Bike'}. - AIMIT EBIKE`;
+  const message = `NEW TEST RIDE: ${data.customerName} (${data.customerPhone}) booked at ${data.hub} on ${data.date} for ${data.bikeInterest || 'AIMIT E-Bike'}. - AIMIT E-BIKE`;
   const results = await sendAdminBroadcast(message);
   return results[0];
 }
@@ -311,6 +329,6 @@ export async function sendAdminOTP(phoneOrEmail: string, code: string) {
   return await sendAlertSMS({
     to: targetPhone,
     message,
-    senderId: 'AIMIT EBIKE',
+    senderId: 'AIMIT E-BIKE',
   });
 }

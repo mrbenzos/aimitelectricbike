@@ -187,9 +187,12 @@ export const dbService = {
   async deleteBike(id: string): Promise<boolean> {
     if (!isServer) {
       try {
-        const res = await fetch(`/api/bikes/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/bikes/${encodeURIComponent(id)}`, { method: 'DELETE' });
         if (res.ok) {
           const data = await res.json();
+          if (globalForApp.memoryBikes) {
+            globalForApp.memoryBikes = globalForApp.memoryBikes.filter((b) => b.id !== id && b.slug !== id);
+          }
           return Boolean(data.success);
         }
       } catch (e) {
@@ -197,9 +200,17 @@ export const dbService = {
       }
     }
 
+    const client = supabaseAdmin || supabase;
+    if (isSupabaseConfigured && client) {
+      try {
+        await client.from('orders').update({ bike_id: null }).eq('bike_id', id);
+        await client.from('bikes').delete().or(`id.eq.${id},slug.eq.${id}`);
+      } catch (e) {}
+    }
+
     const initialLen = (globalForApp.memoryBikes || []).length;
     if (globalForApp.memoryBikes) {
-      globalForApp.memoryBikes = globalForApp.memoryBikes.filter((b) => b.id !== id);
+      globalForApp.memoryBikes = globalForApp.memoryBikes.filter((b) => b.id !== id && b.slug !== id);
     }
     return (globalForApp.memoryBikes?.length || 0) < initialLen;
   },

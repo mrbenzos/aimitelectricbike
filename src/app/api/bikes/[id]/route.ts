@@ -113,26 +113,35 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
+    const rawId = String(params.id || '').trim();
     const client = supabaseAdmin || supabase;
 
     if (isSupabaseConfigured && client) {
       try {
-        await client.from('bikes').delete().eq('id', params.id);
+        // Disconnect from any orders first to avoid foreign key constraints
+        await client.from('orders').update({ bike_id: null }).eq('bike_id', rawId);
+
+        // Delete from Supabase by ID or slug
+        const { error } = await client
+          .from('bikes')
+          .delete()
+          .or(`id.eq.${rawId},slug.eq.${rawId}`);
+
+        if (error) {
+          console.error('Supabase delete error:', error);
+        }
       } catch (sbErr) {
         console.warn('Supabase delete bike warning:', sbErr);
       }
     }
 
-    let deletedLocally = false;
     try {
       const bikes = readBikesFromFile();
-      const initialLen = bikes.length;
-      const filtered = bikes.filter((b) => b.id !== params.id && b.slug !== params.id);
+      const filtered = bikes.filter((b) => b.id !== rawId && b.slug !== rawId);
       writeBikesToFile(filtered);
-      deletedLocally = filtered.length < initialLen;
     } catch (e) {}
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, deleted: rawId });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to delete bike' }, { status: 500 });
   }

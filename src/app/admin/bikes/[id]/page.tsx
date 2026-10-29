@@ -156,26 +156,28 @@ export default function EditBikePage() {
         images,
       });
 
-      // ALERT TRIGGER 1: Price Changed
-      if (Number(price) !== originalBike.price) {
-        await alertBikeAction(modelName, `price changed from GHS ${originalBike.price} to GHS ${price}`);
-        await dbService.logActivity(
-          'price_changed',
-          modelName,
-          `Price adjusted to GHS ${price}. Hubtel alert fired.`
-        );
-      }
+      // Safe non-blocking alerts
+      try {
+        if (Number(price) !== originalBike.price) {
+          await alertBikeAction(modelName, `price changed from GHS ${originalBike.price} to GHS ${price}`);
+          await dbService.logActivity(
+            'price_changed',
+            modelName,
+            `Price adjusted to GHS ${price}.`
+          );
+        }
 
-      // ALERT TRIGGER 2: Marked Sold Out
-      if (determinedStatus === 'sold_out' && originalBike.stock_status !== 'sold_out') {
-        await alertBikeAction(modelName, 'sold_out');
-        await dbService.logActivity('sold', modelName, `Bike marked sold out. Alert fired.`);
-      }
+        if (determinedStatus === 'sold_out' && originalBike.stock_status !== 'sold_out') {
+          await alertBikeAction(modelName, 'sold_out');
+          await dbService.logActivity('sold', modelName, `Bike marked sold out.`);
+        }
 
-      // ALERT TRIGGER 3: Stock dropped to <= 2
-      if (Number(stockQty) <= 2 && Number(stockQty) !== originalBike.stock_qty) {
-        await alertLowStock(modelName, Number(stockQty));
-        await dbService.logActivity('stock_low', modelName, `Stock reduced to ${stockQty}. Hubtel SMS fired.`);
+        if (Number(stockQty) <= 2 && Number(stockQty) !== originalBike.stock_qty) {
+          await alertLowStock(modelName, Number(stockQty));
+          await dbService.logActivity('stock_low', modelName, `Stock reduced to ${stockQty}.`);
+        }
+      } catch (alertErr) {
+        console.warn('Non-blocking inventory alert skipped:', alertErr);
       }
 
       router.push('/admin/bikes');

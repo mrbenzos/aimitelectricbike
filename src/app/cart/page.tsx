@@ -117,7 +117,7 @@ export default function CartPage() {
             <span className="font-bold text-slate-900 font-mono">{orderComplete.customer_phone}</span>
           </div>
           <p className="text-[11px] text-slate-500 pt-1">
-            An automated SMS confirmation was dispatched to your phone from <strong>AIMIT EBIKE</strong>. Our hub logistics team will call you to confirm dispatch.
+            An automated SMS confirmation was dispatched to your phone from <strong>AIMIT E-BIKE</strong>. Our hub logistics team will call you to confirm dispatch.
           </p>
         </div>
 

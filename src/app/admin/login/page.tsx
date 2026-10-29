@@ -42,10 +42,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      setSuccessMsg('Credentials verified. 6-digit OTP dispatched via SMS (AIMIT EBIKE).');
-      if (data.devCode) {
-        setDevCodeHint(data.devCode);
-      }
+      setSuccessMsg('Credentials verified. 6-digit OTP dispatched via SMS (AIMIT E-BIKE).');
       setStep('otp');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to connect to authentication server.');
@@ -129,7 +126,7 @@ export default function AdminLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@msniff.com"
+                  placeholder="Enter registered email"
                   className="w-full bg-[#181818] border border-[#2B2B2B] focus:border-electric rounded-xl pl-9 pr-3 py-2.5 text-xs text-white focus:outline-none"
                 />
               </div>
@@ -150,19 +147,6 @@ export default function AdminLoginPage() {
                   className="w-full bg-[#181818] border border-[#2B2B2B] focus:border-electric rounded-xl pl-9 pr-3 py-2.5 text-xs text-white focus:outline-none"
                 />
               </div>
-            </div>
-
-            <div className="bg-[#181818] p-3 rounded-xl border border-[#282828] text-[11px] text-gray-400">
-              <p className="text-gray-300 font-bold mb-1">Authorized Admin Logins:</p>
-              <p className="flex justify-between items-center py-0.5">
-                <span>Email: <code className="text-electric">benzosjeff430@gmail.com</code></span>
-                <span className="text-[10px] text-gray-400">OTP to 0538973984</span>
-              </p>
-              <p className="flex justify-between items-center py-0.5">
-                <span>Email: <code className="text-electric">admin@msniff.com</code></span>
-                <span className="text-[10px] text-gray-400">OTP to 233245550192</span>
-              </p>
-              <p className="mt-1 pt-1 border-t border-[#252525]">Password: <code className="text-electric">aimitpower2025</code></p>
             </div>
 
             <button
@@ -196,23 +180,9 @@ export default function AdminLoginPage() {
                 />
               </div>
               <p className="text-[11px] text-gray-400 text-center mt-1.5">
-                SMS sender ID: <strong className="text-white">MSNIFF</strong> • Valid for 5 mins
+                SMS sender ID: <strong className="text-white">AIMIT E-BIKE</strong> • Valid for 5 mins
               </p>
             </div>
-
-            {devCodeHint && (
-              <div className="bg-[#181818] border border-electric/40 p-3 rounded-xl text-center space-y-1">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider">Dev/Mock SMS Code Delivered:</p>
-                <p className="text-lg font-mono font-black text-electric">{devCodeHint}</p>
-                <button
-                  type="button"
-                  onClick={() => setOtpCode(devCodeHint)}
-                  className="text-[10px] text-electric underline"
-                >
-                  Auto-fill code
-                </button>
-              </div>
-            )}
 
             <button
               type="submit"

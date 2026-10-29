@@ -39,7 +39,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const generatedSlug = slugify(body.slug || body.model_name);
+    const generatedSlug = slugify(body.slug || body.model_name || 'aimit-bike');
     const newBike: Bike = {
       ...body,
       slug: generatedSlug,
@@ -53,7 +53,20 @@ export async function POST(req: Request) {
     // 1. Primary: Save to Supabase Cloud Database
     if (isSupabaseConfigured && client) {
       try {
-        const { data, error } = await client.from('bikes').insert([newBike]).select().single();
+        let insertBike = { ...newBike };
+
+        // Check if slug already exists to prevent duplicate key constraint error
+        const { data: existing } = await client
+          .from('bikes')
+          .select('id')
+          .eq('slug', insertBike.slug)
+          .maybeSingle();
+
+        if (existing) {
+          insertBike.slug = `${insertBike.slug}-${Math.random().toString(36).substring(2, 6)}`;
+        }
+
+        const { data, error } = await client.from('bikes').insert([insertBike]).select().single();
         if (!error && data) {
           try {
             const currentBikes = readBikesFromFile();
@@ -61,10 +74,17 @@ export async function POST(req: Request) {
           } catch (e) {}
           return NextResponse.json(data as Bike, { status: 201 });
         } else if (error) {
-          console.error('Supabase bike insert error:', error);
+          console.error('Supabase bike insert error, retrying with unique suffix:', error);
+          insertBike.slug = `${generatedSlug}-${Date.now().toString().slice(-4)}`;
+          const retry = await client.from('bikes').insert([insertBike]).select().single();
+          if (!retry.error && retry.data) {
+            return NextResponse.json(retry.data as Bike, { status: 201 });
+          }
+          throw new Error(error.message || 'Failed to save bike to database');
         }
-      } catch (sbErr) {
+      } catch (sbErr: any) {
         console.error('Supabase insert exception:', sbErr);
+        throw sbErr;
       }
     }
 

@@ -152,16 +152,20 @@ export default function NewBikePage() {
         images,
       });
 
-      // Log activity
-      await dbService.logActivity(
-        'bike_created',
-        modelName,
-        `Added new model to inventory (GHS ${price}, Stock: ${stockQty})`
-      );
+      // Safe non-blocking activity log
+      try {
+        await dbService.logActivity(
+          'bike_created',
+          modelName,
+          `Added new model to inventory (GHS ${price}, Stock: ${stockQty})`
+        );
+      } catch (e) {}
 
-      // Trigger Hubtel SMS if stock is immediately low (<= 2)
+      // Safe non-blocking SMS alert
       if (Number(stockQty) <= 2) {
-        await alertLowStock(modelName, Number(stockQty));
+        try {
+          await alertLowStock(modelName, Number(stockQty));
+        } catch (e) {}
       }
 
       router.push('/admin/bikes');
