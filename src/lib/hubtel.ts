@@ -54,8 +54,17 @@ export async function sendAlertSMS({
   message,
   senderId,
 }: SendSMSOptions): Promise<HubtelSMSResult> {
-  const defaultSender = process.env.SENDER_ID || 'AIMIT E-BIKE';
-  const finalSender = senderId || defaultSender;
+  const defaultSender = process.env.SENDER_ID || 'AIMIT EBIKE';
+  let finalSender = (senderId || defaultSender).trim();
+
+  // Ghanaian telco gateways (MTN, Telecel, AT) reject hyphens in alphanumeric sender IDs
+  if (finalSender.includes('-')) {
+    finalSender = finalSender.replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  if (!finalSender || finalSender.toUpperCase() === 'MSNIFF') {
+    finalSender = 'AIMIT EBIKE';
+  }
+
   const formattedPhone = formatGhanaPhone(to);
 
   // If running on client, proxy to server API to prevent browser CORS errors
@@ -245,7 +254,7 @@ async function sendAdminBroadcast(message: string) {
       sendAlertSMS({
         to: phone,
         message,
-        senderId: 'AIMIT E-BIKE',
+        senderId: 'AIMIT EBIKE',
       })
     )
   );
@@ -286,8 +295,8 @@ export async function alertNewOrder(orderData: {
   const adminPromise = sendAdminBroadcast(adminMsg);
 
   // SMS to Customer
-  const customerSender = process.env.SENDER_ID_CUSTOMER || 'AIMIT E-BIKE';
-  const customerMsg = `Hello ${orderData.customerName}, your order for ${orderData.modelName} (Delivery to ${orderData.deliveryHub}) has been received! Our hub representative will call you shortly. - AIMIT E-BIKE`;
+  const customerSender = process.env.SENDER_ID_CUSTOMER || 'AIMIT EBIKE';
+  const customerMsg = `Hello ${orderData.customerName}, your order for ${orderData.modelName} (Delivery to ${orderData.deliveryHub}) has been received! Our hub representative will call you shortly. - AIMIT EBIKE`;
   const customerPromise = sendAlertSMS({
     to: orderData.customerPhone,
     message: customerMsg,
@@ -308,7 +317,7 @@ export async function alertNewTestRide(data: {
   date: string;
   bikeInterest?: string;
 }) {
-  const message = `NEW TEST RIDE: ${data.customerName} (${data.customerPhone}) booked at ${data.hub} on ${data.date} for ${data.bikeInterest || 'AIMIT E-Bike'}. - AIMIT E-BIKE`;
+  const message = `NEW TEST RIDE: ${data.customerName} (${data.customerPhone}) booked at ${data.hub} on ${data.date} for ${data.bikeInterest || 'AIMIT E-Bike'}. - AIMIT EBIKE`;
   const results = await sendAdminBroadcast(message);
   return results[0];
 }
@@ -329,6 +338,6 @@ export async function sendAdminOTP(phoneOrEmail: string, code: string) {
   return await sendAlertSMS({
     to: targetPhone,
     message,
-    senderId: 'AIMIT E-BIKE',
+    senderId: 'AIMIT EBIKE',
   });
 }

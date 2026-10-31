@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      setSuccessMsg('Credentials verified. 6-digit OTP dispatched via SMS (AIMIT E-BIKE).');
+      setSuccessMsg(data.message || 'Credentials verified. 6-digit OTP dispatched via SMS (AIMIT EBIKE).');
       setStep('otp');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to connect to authentication server.');

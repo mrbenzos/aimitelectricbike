@@ -38,9 +38,25 @@ export async function POST(req: Request) {
     // Send 2FA SMS
     const smsResult = await sendAdminOTP(email, otpCode);
 
+    if (!smsResult.success) {
+      console.error('Failed to send OTP SMS:', smsResult.error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `SMS Gateway error: ${smsResult.error || 'Could not dispatch SMS'}.`,
+        },
+        { status: 500 }
+      );
+    }
+
+    const maskedPhone =
+      normalizedEmail === 'benzosjeff430@gmail.com'
+        ? '0538***3984'
+        : '0242***5706';
+
     return NextResponse.json({
       success: true,
-      message: 'OTP sent to registered admin phone via SMS.',
+      message: `6-digit verification code sent to ${maskedPhone} via SMS (AIMIT EBIKE).`,
       expiresAt: expiresAt.toISOString(),
       mock: smsResult.mock,
       devCode: smsResult.mock ? otpCode : undefined,
