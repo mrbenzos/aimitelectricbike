@@ -9,8 +9,8 @@ export default function AdminLoginPage() {
   const router = useRouter();
 
   // Step 1: Credentials
-  const [email, setEmail] = useState('benzosjeff430@gmail.com');
-  const [password, setPassword] = useState('aimitpower2025');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
 
   // Step 2: OTP
@@ -70,9 +70,14 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // Store in client storage
+      // Store in client storage and cookie
       localStorage.setItem('msniff_admin_token', 'active_' + Date.now());
-      router.push('/admin');
+      document.cookie = 'msniff_admin_session=authenticated_' + Date.now() + '; path=/; max-age=86400; SameSite=Lax';
+
+      // Check for redirect query param
+      const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const redirectTarget = urlParams?.get('redirect') || '/admin';
+      router.push(redirectTarget);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to verify OTP.');
     } finally {

@@ -24,9 +24,24 @@ import AimitLogo from '@/components/AimitLogo';
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [lowStockCount, setLowStockCount] = useState(0);
 
   useEffect(() => {
+    // Check if user has an active admin session
+    const token = typeof window !== 'undefined' ? localStorage.getItem('msniff_admin_token') : null;
+    const hasCookie = typeof document !== 'undefined' && document.cookie.includes('msniff_admin_session');
+
+    if (!token && !hasCookie) {
+      setIsAuthenticated(false);
+      router.replace('/admin/login');
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router, pathname]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
     async function checkStock() {
       try {
         const bikes = await dbService.getBikes();
@@ -37,10 +52,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     }
     checkStock();
-  }, [pathname]);
+  }, [pathname, isAuthenticated]);
 
   const handleLogout = () => {
     localStorage.removeItem('msniff_admin_token');
+    document.cookie = 'msniff_admin_session=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/admin/login');
   };
 
@@ -52,6 +68,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/reports', label: 'Reports & Analytics', icon: BarChart3 },
     { href: '/admin/activity', label: 'Activity Logs', icon: History },
   ];
+
+  if (isAuthenticated !== true) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-gray-400 space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-electric/10 border border-electric/40 flex items-center justify-center text-electric shadow-electric animate-pulse">
+          <ShieldCheck className="w-6 h-6" />
+        </div>
+        <p className="text-xs font-mono uppercase tracking-widest text-gray-400">Verifying Security Credentials...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-gray-200 flex flex-col md:flex-row">
