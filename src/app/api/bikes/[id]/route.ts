@@ -141,18 +141,30 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
           if (!error) deletedFromSupabase = true;
           else console.error('Supabase delete by UUID error:', error);
         } else {
-          // Non-UUID: treat rawId as a slug — find the bike first, get its real UUID, then delete
-          const { data: found } = await client
+          // Non-UUID: search by id column first, then slug column
+          const { data: byId } = await client
             .from('bikes')
             .select('id')
-            .eq('slug', rawId)
+            .eq('id', rawId)
             .maybeSingle();
 
-          if (found?.id) {
-            await client.from('orders').update({ bike_id: null }).eq('bike_id', found.id);
-            const { error } = await client.from('bikes').delete().eq('id', found.id);
+          const { data: bySlug } = !byId
+            ? await client.from('bikes').select('id').eq('slug', rawId).maybeSingle()
+            : { data: null };
+
+          const realId = byId?.id || bySlug?.id;
+
+          if (realId) {
+            await client.from('orders').update({ bike_id: null }).eq('bike_id', realId);
+            const { error } = await client.from('bikes').delete().eq('id', realId);
             if (!error) deletedFromSupabase = true;
-            else console.error('Supabase delete by slug error:', error);
+            else console.error('Supabase delete by id/slug error:', error);
+          } else {
+            // Last resort: try deleting directly by id text match (handles text-type id column)
+            await client.from('orders').update({ bike_id: null }).eq('bike_id', rawId);
+            const { error } = await client.from('bikes').delete().eq('id', rawId);
+            if (!error) deletedFromSupabase = true;
+            else console.error('Supabase delete direct text id error:', error);
           }
         }
       } catch (sbErr) {
@@ -167,7 +179,11 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       writeBikesToFile(filtered);
     } catch (e) {}
 
-    return NextResponse.json({ success: true, deleted: rawId });
+    if (!deletedFromSupabase) {
+      console.warn(`[DELETE /api/bikes/${rawId}] Not found in Supabase — may already be deleted or ID mismatch.`);
+    }
+
+    return NextResponse.json({ success: true, deleted: rawId, fromSupabase: deletedFromSupabase });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to delete bike' }, { status: 500 });
   }
