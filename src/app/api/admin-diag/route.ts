@@ -45,5 +45,6 @@ export async function GET() {
     hasClient: Boolean(client),
     hasAdminClient: Boolean(supabaseAdmin),
     deleteTest,
+    status: isSupabaseConfigured && client ? 'SUPABASE_CONNECTED_AND_ACTIVE' : 'DISCONNECTED',
   });
 }

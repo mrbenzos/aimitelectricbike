@@ -3,8 +3,12 @@ import { INITIAL_BIKES, INITIAL_ORDERS, INITIAL_TEST_RIDES, INITIAL_ACTIVITY_LOG
 import { Bike, Order, TestRideBooking, ActivityLog } from './types';
 import { slugify } from './utils';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const DEFAULT_SUPABASE_URL = 'https://yosyubxiefspeqxhwzwi.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvc3l1YnhpZWZzcGVxeGh3endpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMjQzMDIsImV4cCI6MjEwODcwMDMwMn0.Zu5jbfhUgOTkpfZf3VErHoiLbaNszoQzqU8cxuPt8NU';
+const DEFAULT_SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvc3l1YnhpZWZzcGVxeGh3endpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MzEyNDMwMiwiZXhwIjoyMTA4NzAwMzAyfQ.L8lYvYX9ATcdB-72-4RWrJVMDK0WRgVmQkOCHwk0TXw';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl && 
@@ -18,7 +22,7 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
   : null;
 
 // Service role client for privileged backend ops (admin OTP, alerts, activity log)
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || DEFAULT_SUPABASE_SERVICE_KEY;
 export const supabaseAdmin: SupabaseClient | null = (isSupabaseConfigured && supabaseServiceKey)
   ? createClient(supabaseUrl!, supabaseServiceKey)
   : supabase;
