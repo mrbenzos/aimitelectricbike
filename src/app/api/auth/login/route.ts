@@ -59,13 +59,17 @@ export async function POST(req: Request) {
         ? '0538***3984'
         : '0242***5706';
 
-    const timestamp = Date.now();
+    // Build a self-contained stateless ticket that encodes the OTP code itself.
+    // Format: base64(email:otpCode:expiresAtMs):hmac
+    // This means verification does NOT need DB, memory, or cookies — just the ticket + submitted code.
+    const expiresAtMs = expiresAt.getTime();
     const secret = process.env.ADMIN_JWT_SECRET || 'aimit-admin-secret-2025';
-    const hash = crypto
+    const payload = Buffer.from(`${normalizedEmail}:${otpCode}:${expiresAtMs}`).toString('base64url');
+    const sig = crypto
       .createHmac('sha256', secret)
-      .update(`${normalizedEmail}:${otpCode}:${timestamp}`)
+      .update(payload)
       .digest('hex');
-    const ticket = `${timestamp}:${hash}`;
+    const ticket = `${payload}.${sig}`;
 
     const res = NextResponse.json({
       success: true,
@@ -74,8 +78,9 @@ export async function POST(req: Request) {
       ticket,
     });
 
+    // Also set as cookie (belt-and-suspenders)
     res.cookies.set('msniff_otp_ticket', ticket, {
-      httpOnly: true,
+      httpOnly: false, // Allow JS to read as fallback
       maxAge: 5 * 60, // 5 minutes
       path: '/',
       sameSite: 'lax',

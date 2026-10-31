@@ -16,37 +16,69 @@ export async function POST(req: Request) {
     const cleanEmail = email.trim().toLowerCase();
     const cleanCode = code.trim();
 
-    // 1. Database check (if otp_codes table exists)
     let isValid = false;
-    try {
-      isValid = await dbService.verifyOTP(cleanEmail, cleanCode);
-    } catch (e) {
-      console.warn('DB OTP verify warning:', e);
+
+    // --- PRIMARY: Stateless self-contained ticket (works across serverless instances) ---
+    // Ticket format: base64url(email:code:expiresAtMs).hmacSig
+    const rawTicket = clientTicket || (() => {
+      const cookieHeader = req.headers.get('cookie') || '';
+      const m = cookieHeader.match(/msniff_otp_ticket=([^;]+)/);
+      return m ? decodeURIComponent(m[1]) : null;
+    })();
+
+    if (rawTicket && rawTicket.includes('.')) {
+      try {
+        const dotIdx = rawTicket.lastIndexOf('.');
+        const payload = rawTicket.slice(0, dotIdx);
+        const sig = rawTicket.slice(dotIdx + 1);
+
+        const secret = process.env.ADMIN_JWT_SECRET || 'aimit-admin-secret-2025';
+        const expectedSig = crypto
+          .createHmac('sha256', secret)
+          .update(payload)
+          .digest('hex');
+
+        if (expectedSig === sig) {
+          // Signature is valid — decode payload
+          const decoded = Buffer.from(payload, 'base64url').toString('utf-8');
+          const parts = decoded.split(':');
+          // parts: [email, otpCode, expiresAtMs]
+          if (parts.length >= 3) {
+            const [ticketEmail, ticketCode, expiresAtMs] = parts;
+            const now = Date.now();
+            const expiresAt = parseInt(expiresAtMs, 10);
+
+            if (
+              ticketEmail === cleanEmail &&
+              ticketCode === cleanCode &&
+              !isNaN(expiresAt) &&
+              now <= expiresAt
+            ) {
+              isValid = true;
+            } else {
+              console.warn('[verify] Ticket payload mismatch or expired:', {
+                emailMatch: ticketEmail === cleanEmail,
+                codeMatch: ticketCode === cleanCode,
+                expired: now > expiresAt,
+                now,
+                expiresAt,
+              });
+            }
+          }
+        } else {
+          console.warn('[verify] Ticket HMAC signature mismatch');
+        }
+      } catch (e) {
+        console.warn('[verify] Ticket decode error:', e);
+      }
     }
 
-    // 2. Stateless HMAC validation fallback (guarantees verification even if DB table is uninitialized)
+    // --- FALLBACK: In-memory OTP (works in dev / single-instance) ---
     if (!isValid) {
-      const cookieHeader = req.headers.get('cookie') || '';
-      const cookieMatch = cookieHeader.match(/msniff_otp_ticket=([^;]+)/);
-      const ticket = clientTicket || (cookieMatch ? cookieMatch[1] : null);
-
-      if (ticket && ticket.includes(':')) {
-        const [tsStr, expectedHash] = ticket.split(':');
-        const ts = parseInt(tsStr, 10);
-        const now = Date.now();
-
-        // Valid for up to 5 minutes (300,000 ms)
-        if (!isNaN(ts) && now - ts <= 5 * 60 * 1000) {
-          const secret = process.env.ADMIN_JWT_SECRET || 'aimit-admin-secret-2025';
-          const calculatedHash = crypto
-            .createHmac('sha256', secret)
-            .update(`${cleanEmail}:${cleanCode}:${ts}`)
-            .digest('hex');
-
-          if (calculatedHash === expectedHash) {
-            isValid = true;
-          }
-        }
+      try {
+        isValid = await dbService.verifyOTP(cleanEmail, cleanCode);
+      } catch (e) {
+        console.warn('DB/memory OTP verify warning:', e);
       }
     }
 

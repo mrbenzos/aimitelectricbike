@@ -43,7 +43,12 @@ export default function AdminLoginPage() {
         return;
       }
 
-      if (data.ticket) setTicket(data.ticket);
+      const t = data.ticket || null;
+      if (t) {
+        setTicket(t);
+        // Also persist to sessionStorage in case React state is lost
+        try { sessionStorage.setItem('msniff_otp_ticket', t); } catch {}
+      }
       setSuccessMsg(data.message || 'Credentials verified. 6-digit OTP dispatched via SMS (AIMIT EBIKE).');
       setStep('otp');
     } catch (err: any) {
@@ -59,10 +64,15 @@ export default function AdminLoginPage() {
     setErrorMsg(null);
 
     try {
+      // Read ticket from state, sessionStorage fallback, or cookie
+      const resolvedTicket = ticket
+        || (() => { try { return sessionStorage.getItem('msniff_otp_ticket'); } catch { return null; } })()
+        || (() => { const m = document.cookie.match(/msniff_otp_ticket=([^;]+)/); return m ? decodeURIComponent(m[1]) : null; })();
+
       const res = await fetch('/api/auth/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: otpCode, ticket }),
+        body: JSON.stringify({ email, code: otpCode, ticket: resolvedTicket }),
       });
 
       const data = await res.json();
@@ -187,7 +197,7 @@ export default function AdminLoginPage() {
                 />
               </div>
               <p className="text-[11px] text-gray-400 text-center mt-1.5">
-                SMS sender ID: <strong className="text-white">AIMIT E-BIKE</strong> • Valid for 5 mins
+                SMS sender ID: <strong className="text-white">AIMIT EBIKE</strong> • Valid for 5 mins
               </p>
             </div>
 
