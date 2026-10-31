@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { dbService } from '@/lib/supabaseClient';
 import { sendAdminOTP } from '@/lib/hubtel';
 
@@ -32,10 +33,14 @@ export async function POST(req: Request) {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes valid
 
-    // Save to otp_codes table
-    await dbService.saveOTP(email, otpCode, expiresAt);
+    // Save to otp_codes table if available (non-blocking)
+    try {
+      await dbService.saveOTP(email, otpCode, expiresAt);
+    } catch (e) {
+      console.warn('DB OTP save warning:', e);
+    }
 
-    // Send 2FA SMS
+    // Send 2FA SMS via registered Vynfy sender AIMIT EBIKE
     const smsResult = await sendAdminOTP(email, otpCode);
 
     if (!smsResult.success) {
@@ -54,13 +59,29 @@ export async function POST(req: Request) {
         ? '0538***3984'
         : '0242***5706';
 
-    return NextResponse.json({
+    const timestamp = Date.now();
+    const secret = process.env.ADMIN_JWT_SECRET || 'aimit-admin-secret-2025';
+    const hash = crypto
+      .createHmac('sha256', secret)
+      .update(`${normalizedEmail}:${otpCode}:${timestamp}`)
+      .digest('hex');
+    const ticket = `${timestamp}:${hash}`;
+
+    const res = NextResponse.json({
       success: true,
       message: `6-digit verification code sent to ${maskedPhone} via SMS (AIMIT EBIKE).`,
       expiresAt: expiresAt.toISOString(),
-      mock: smsResult.mock,
-      devCode: smsResult.mock ? otpCode : undefined,
+      ticket,
     });
+
+    res.cookies.set('msniff_otp_ticket', ticket, {
+      httpOnly: true,
+      maxAge: 5 * 60, // 5 minutes
+      path: '/',
+      sameSite: 'lax',
+    });
+
+    return res;
   } catch (error: any) {
     console.error('Admin login error:', error);
     return NextResponse.json(

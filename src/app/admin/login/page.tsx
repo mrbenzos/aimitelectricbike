@@ -15,6 +15,7 @@ export default function AdminLoginPage() {
 
   // Step 2: OTP
   const [otpCode, setOtpCode] = useState('');
+  const [ticket, setTicket] = useState<string | null>(null);
   const [devCodeHint, setDevCodeHint] = useState<string | null>(null);
 
   // States
@@ -42,6 +43,7 @@ export default function AdminLoginPage() {
         return;
       }
 
+      if (data.ticket) setTicket(data.ticket);
       setSuccessMsg(data.message || 'Credentials verified. 6-digit OTP dispatched via SMS (AIMIT EBIKE).');
       setStep('otp');
     } catch (err: any) {
@@ -60,7 +62,7 @@ export default function AdminLoginPage() {
       const res = await fetch('/api/auth/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: otpCode }),
+        body: JSON.stringify({ email, code: otpCode, ticket }),
       });
 
       const data = await res.json();
