@@ -19,58 +19,61 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-16 pb-20">
-      {/* 1. HERO SECTION — Bright & Vibrant */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden border-b border-slate-200 bg-gradient-to-b from-emerald-50/60 via-white to-slate-50">
+      {/* 1. HERO SECTION — Full bike background */}
+      <section className="relative min-h-[88vh] flex items-center justify-center overflow-hidden border-b border-slate-200">
+        {/* Full-bleed background image */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=2000&auto=format&fit=crop"
-            alt="AIMIT Electric Bicycle on a rugged terrain path in Ghana"
-            className="w-full h-full object-cover object-center opacity-15 scale-105 transform filter brightness-105 contrast-105"
+            src="/hero-bikes.jpg"
+            alt="AIMIT Electric Bicycles — heavy-duty fat-tyre e-bikes"
+            className="w-full h-full object-cover object-center"
+            style={{ objectPosition: 'center 30%' }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-white/80 to-transparent" />
+          {/* Dark overlay so text stays readable */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-slate-900 uppercase leading-none font-sans">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white uppercase leading-none font-sans drop-shadow-lg">
             Save Fuel. Beat Traffic. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-800">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500">
               Ride Electric Ghana.
             </span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Heavy-duty <strong>AIMIT Electric Bicycles</strong> for Accra gridlocks and rough savanna paths. 
+          <p className="mt-6 text-base sm:text-lg text-slate-200 max-w-2xl mx-auto leading-relaxed drop-shadow">
+            Heavy-duty <strong className="text-white">AIMIT Electric Bicycles</strong> for Accra gridlocks and rough savanna paths.
             Pothole-ready suspension, reduced fuel costs, nationwide delivery from 4 hubs.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/bikes"
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm px-8 py-4 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all uppercase tracking-wider"
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm px-8 py-4 rounded-xl shadow-lg hover:shadow-emerald-500/40 hover:scale-105 transition-all uppercase tracking-wider"
             >
               View All E-Bikes <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
             <Link
               href="/contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 hover:border-emerald-500 font-bold text-sm px-8 py-4 rounded-xl shadow-sm transition-all uppercase tracking-wider"
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/40 hover:border-white font-bold text-sm px-8 py-4 rounded-xl shadow-sm transition-all uppercase tracking-wider"
             >
               Book Free Test Ride
             </Link>
           </div>
 
           {/* Compact value props — single row */}
-          <div className="mt-14 flex flex-wrap justify-center gap-4 text-xs text-slate-700">
-            <span className="flex items-center gap-1.5 bg-white border border-slate-200 px-3.5 py-2 rounded-full shadow-sm">
-              <Flame className="w-3.5 h-3.5 text-emerald-600" /> Save on Fuel Costs
+          <div className="mt-14 flex flex-wrap justify-center gap-4 text-xs text-white">
+            <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm border border-white/20 px-3.5 py-2 rounded-full shadow-sm">
+              <Flame className="w-3.5 h-3.5 text-emerald-400" /> Save on Fuel Costs
             </span>
-            <span className="flex items-center gap-1.5 bg-white border border-slate-200 px-3.5 py-2 rounded-full shadow-sm">
-              <BatteryCharging className="w-3.5 h-3.5 text-emerald-600" /> Up to 120 km Range
+            <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm border border-white/20 px-3.5 py-2 rounded-full shadow-sm">
+              <BatteryCharging className="w-3.5 h-3.5 text-emerald-400" /> Up to 120 km Range
             </span>
-            <span className="flex items-center gap-1.5 bg-white border border-slate-200 px-3.5 py-2 rounded-full shadow-sm">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> 12-Month Warranty
+            <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm border border-white/20 px-3.5 py-2 rounded-full shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 12-Month Warranty
             </span>
-            <span className="flex items-center gap-1.5 bg-white border border-slate-200 px-3.5 py-2 rounded-full shadow-sm">
-              <Truck className="w-3.5 h-3.5 text-emerald-600" /> 4 Nationwide Hubs
+            <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm border border-white/20 px-3.5 py-2 rounded-full shadow-sm">
+              <Truck className="w-3.5 h-3.5 text-emerald-400" /> 4 Nationwide Hubs
             </span>
           </div>
         </div>
