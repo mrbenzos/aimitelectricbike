@@ -150,7 +150,7 @@ export default function Footer() {
             {/* Social media links */}
             <div className="flex items-center gap-4">
               <a
-                href="https://www.tiktok.com/@msniff1"
+                href="https://www.tiktok.com/@msniffbusinesshubb"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Follow us on TikTok"
