@@ -79,7 +79,7 @@ export default function RefundPolicyPage() {
           <h2 className="text-xl font-black text-slate-900 border-b border-slate-200 pb-2">8. Contact</h2>
           <p>For questions or support regarding refunds and exchanges:</p>
           <ul className="space-y-1 mt-2">
-            <li><strong>Email:</strong> <a href="mailto:info@msniffhub.com" className="text-emerald-700 hover:underline">info@msniffhub.com</a></li>
+            <li><strong>Email:</strong> <a href="mailto:msniffbusinesshub@gmail.com" className="text-emerald-700 hover:underline">msniffbusinesshub@gmail.com</a></li>
             <li><strong>Phone / WhatsApp:</strong> <a href="tel:+233242365706" className="text-emerald-700 hover:underline">+233 24 236 5706</a></li>
           </ul>
         </section>

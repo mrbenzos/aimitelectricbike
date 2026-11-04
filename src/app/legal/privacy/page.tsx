@@ -86,7 +86,7 @@ export default function PrivacyPolicyPage() {
           <p>If you have any questions about this Privacy Policy or our data practices, please contact our Data Protection Officer:</p>
           <ul className="space-y-1 mt-2">
             <li><strong>Name:</strong> Alhaji Mustapha Sniff</li>
-            <li><strong>Email:</strong> <a href="mailto:info@msniffhub.com" className="text-emerald-700 hover:underline">info@msniffhub.com</a></li>
+            <li><strong>Email:</strong> <a href="mailto:msniffbusinesshub@gmail.com" className="text-emerald-700 hover:underline">msniffbusinesshub@gmail.com</a></li>
             <li><strong>Phone:</strong> <a href="tel:+233242365706" className="text-emerald-700 hover:underline">+233 24 236 5706</a></li>
             <li><strong>Address:</strong> M.Sniff Complex, Near Amasaman Stadium / High Court Road, Amasaman, Greater Accra, Ghana</li>
           </ul>
