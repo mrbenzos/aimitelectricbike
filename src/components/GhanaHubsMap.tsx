@@ -115,14 +115,16 @@ export default function GhanaHubsMap() {
                 key={hub.id}
                 type="button"
                 onClick={() => setSelectedHubId(hub.id)}
-                className={`p-2.5 rounded-xl border text-center transition-all ${
+                className={`p-2.5 h-14 flex flex-col justify-center items-center rounded-xl border text-center transition-all ${
                   selectedHubId === hub.id
                     ? 'bg-emerald-600 text-white font-black border-emerald-600 shadow-sm'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >
-                <span className="text-xs block truncate">{hub.name.split(' ')[0]}</span>
-                <span className="text-[10px] opacity-90 block">{hub.id === 'amasaman' ? 'Free (HQ)' : formatGHS(hub.fee)}</span>
+                <span className="text-xs font-bold block truncate">{hub.name.split(' ')[0]}</span>
+                {hub.id === 'amasaman' && (
+                  <span className="text-[10px] opacity-90 block">Free (HQ)</span>
+                )}
               </button>
             ))}
           </div>
@@ -144,8 +146,8 @@ export default function GhanaHubsMap() {
 
               <div className="text-right">
                 <span className="text-[11px] text-slate-500 block">Hub Transit Fee</span>
-                <span className="text-lg font-black text-slate-900">
-                  {activeHub.fee === 0 ? 'FREE (HQ Pickup)' : formatGHS(activeHub.fee)}
+                <span className="text-lg font-black text-emerald-600">
+                  {activeHub.isHQ ? 'FREE (HQ Pickup)' : 'FREE'}
                 </span>
               </div>
             </div>

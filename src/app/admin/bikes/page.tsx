@@ -207,11 +207,6 @@ export default function AdminBikesPage() {
                       <td className="py-3.5 px-4 capitalize font-medium">{bike.category}</td>
                       <td className="py-3.5 px-4">
                         <span className="font-bold text-electric text-sm">{formatGHS(effectivePrice)}</span>
-                        {bike.promo_price && (
-                          <span className="block text-[10px] text-gray-500 line-through">
-                            {formatGHS(bike.price)}
-                          </span>
-                        )}
                       </td>
                       <td className="py-3.5 px-4">
                         <p className="font-bold text-white">{bike.range_km} km</p>

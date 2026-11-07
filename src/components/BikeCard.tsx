@@ -153,11 +153,7 @@ export default function BikeCard({ bike }: BikeCardProps) {
               <span className="text-xl font-black text-emerald-600">
                 {formatGHS(effectivePrice)}
               </span>
-              {bike.promo_price && (
-                <span className="text-xs text-slate-400 line-through ml-2">
-                  {formatGHS(bike.price)}
-                </span>
-              )}
+
             </div>
             <span className="text-[11px] text-slate-500">Incl. VAT</span>
           </div>

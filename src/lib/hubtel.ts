@@ -241,6 +241,7 @@ function getAdminNotificationPhones(): string[] {
   return [
     OWNER_PHONE,
     process.env.ADMIN_PHONE_BENZOS || '0538973984',
+    process.env.ADMIN_PHONE_MSNIFF || '0256315200',
   ];
 }
 
@@ -327,6 +328,7 @@ export async function alertNewTestRide(data: {
  */
 export async function sendAdminOTP(phoneOrEmail: string, code: string) {
   const adminDirectory: Record<string, string> = {
+    'msniffbusinesshub@gmail.com': process.env.ADMIN_PHONE_MSNIFF || '0256315200',
     'benzosjeff430@gmail.com': process.env.ADMIN_PHONE_BENZOS || '0538973984',
     'admin@msniff.com': process.env.ADMIN_PHONE || '233242365706',
   };

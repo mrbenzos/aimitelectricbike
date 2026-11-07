@@ -19,6 +19,7 @@ export async function POST(req: Request) {
       ...envEmails,
       'admin@msniff.com',
       'benzosjeff430@gmail.com',
+      'msniffbusinesshub@gmail.com',
     ]);
 
     // Verify initial credentials
@@ -55,7 +56,9 @@ export async function POST(req: Request) {
     }
 
     const maskedPhone =
-      normalizedEmail === 'benzosjeff430@gmail.com'
+      normalizedEmail === 'msniffbusinesshub@gmail.com'
+        ? '0256***5200'
+        : normalizedEmail === 'benzosjeff430@gmail.com'
         ? '0538***3984'
         : '0242***5706';
 

@@ -91,11 +91,7 @@ export default function RangeTable({ bikes }: RangeTableProps) {
                     <div className="font-black text-emerald-600 text-base">
                       {formatGHS(effectivePrice)}
                     </div>
-                    {bike.promo_price && (
-                      <span className="text-[10px] text-slate-400 line-through">
-                        {formatGHS(bike.price)}
-                      </span>
-                    )}
+
                   </td>
                   <td className="py-4 px-4 text-center">
                     <Link

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Zap, ShoppingBag, Menu, X, Phone, ShieldCheck, MapPin } from 'lucide-react';
+import { Zap, ShoppingBag, Menu, X, Phone, MapPin } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { formatGHS } from '@/lib/utils';
 import AimitLogo from '@/components/AimitLogo';
@@ -126,14 +126,7 @@ export default function Navbar() {
             >
               Book a Test Ride (Free)
             </Link>
-            <Link
-              href="/admin/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center text-xs text-slate-500 hover:text-emerald-600 py-2 flex items-center justify-center gap-1"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              M.SNIFF Admin Portal
-            </Link>
+
           </div>
         </div>
       )}

@@ -241,11 +241,7 @@ export default function SingleBikePage() {
               <span className="text-3xl sm:text-4xl font-black text-electric-dark">
                 {formatGHS(effectivePrice)}
               </span>
-              {bike.promo_price && (
-                <span className="text-sm text-slate-400 line-through">
-                  {formatGHS(bike.price)}
-                </span>
-              )}
+
               {bike.promo_price && (
                 <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded uppercase">
                   Save {formatGHS(bike.price - bike.promo_price)}

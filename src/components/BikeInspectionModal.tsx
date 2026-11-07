@@ -344,11 +344,7 @@ export default function BikeInspectionModal({
                 <span className="text-2xl font-black text-electric-dark">
                   {formatGHS(effectivePrice)}
                 </span>
-                {bike.promo_price && (
-                  <span className="text-xs text-slate-400 line-through">
-                    {formatGHS(bike.price)}
-                  </span>
-                )}
+
               </div>
               <p className="text-[11px] text-slate-600 mt-0.5">
                 40% Initial Downpayment: <strong className="text-slate-900">{formatGHS(installment.downPayment)}</strong>, then {formatGHS(installment.monthlyOver3Months)}/mo
