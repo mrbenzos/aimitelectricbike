@@ -41,6 +41,12 @@ export default function NewBikePage() {
   const [stockQty, setStockQty] = useState<number>(5);
   const [stockStatus, setStockStatus] = useState<StockStatus>('in_stock');
   const [featured, setFeatured] = useState<boolean>(false);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoTitle, setVideoTitle] = useState('');
+  const [videoDuration, setVideoDuration] = useState('');
+  const [potholeScore, setPotholeScore] = useState<number>(9);
+  const [hillClimb, setHillClimb] = useState('Up to 25° Incline');
+  const [waterRating, setWaterRating] = useState('IP65 Weatherproof / Heavy Rain');
 
   // Images state (array of URLs or uploaded storage links)
   const [images, setImages] = useState<string[]>([
@@ -149,6 +155,14 @@ export default function NewBikePage() {
         stock_qty: Number(stockQty),
         stock_status: determinedStatus,
         featured,
+        video_url: videoUrl.trim() || undefined,
+        video_title: videoTitle.trim() || undefined,
+        video_duration: videoDuration.trim() || undefined,
+        terrain_rating: {
+          pothole_score: Number(potholeScore),
+          hill_climb: hillClimb.trim(),
+          water_rating: waterRating.trim(),
+        },
         images,
       });
 
@@ -417,6 +431,95 @@ export default function NewBikePage() {
                     />
                     <span>Feature on Homepage</span>
                   </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Road Test Video Showcase */}
+            <div className="bg-[#161616] p-4 rounded-xl border border-[#242424] space-y-4">
+              <h3 className="text-xs font-bold text-electric uppercase tracking-wider flex items-center gap-2">
+                Road Test Video Showcase
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="text-[11px] font-bold text-gray-400 block mb-1">
+                    Video URL (YouTube Embed / MP4 / Cloud):
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://www.youtube.com/watch?v=... or direct MP4"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    className="w-full bg-[#1C1C1C] border border-[#2E2E2E] focus:border-electric rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-gray-400 block mb-1">Video Duration:</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 3:45 min"
+                    value={videoDuration}
+                    onChange={(e) => setVideoDuration(e.target.value)}
+                    className="w-full bg-[#1C1C1C] border border-[#2E2E2E] focus:border-electric rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-gray-400 block mb-1">Video Display Title:</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Accra City Commute & Pothole Absorption Road Test"
+                  value={videoTitle}
+                  onChange={(e) => setVideoTitle(e.target.value)}
+                  className="w-full bg-[#1C1C1C] border border-[#2E2E2E] focus:border-electric rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Ghana Road & Terrain Ratings */}
+            <div className="bg-[#161616] p-4 rounded-xl border border-[#242424] space-y-4">
+              <h3 className="text-xs font-bold text-electric uppercase tracking-wider flex items-center gap-2">
+                Ghana Road & Weather Condition Ratings
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[11px] font-bold text-gray-400 block mb-1">
+                    Pothole Resistance (1 to 10):
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={potholeScore}
+                    onChange={(e) => setPotholeScore(Number(e.target.value))}
+                    className="w-full bg-[#1C1C1C] border border-[#2E2E2E] focus:border-electric rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-gray-400 block mb-1">Hill Climbing Ability:</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Up to 25° Incline (Aburi Hills Tested)"
+                    value={hillClimb}
+                    onChange={(e) => setHillClimb(e.target.value)}
+                    className="w-full bg-[#1C1C1C] border border-[#2E2E2E] focus:border-electric rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-gray-400 block mb-1">Water & Rain Protection:</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. IP65 Weatherproof / Heavy Rain"
+                    value={waterRating}
+                    onChange={(e) => setWaterRating(e.target.value)}
+                    className="w-full bg-[#1C1C1C] border border-[#2E2E2E] focus:border-electric rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                  />
                 </div>
               </div>
             </div>

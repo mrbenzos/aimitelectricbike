@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminLayout from '@/components/AdminLayout';
+import EditBikeModal from '@/components/EditBikeModal';
 import { dbService } from '@/lib/supabaseClient';
 import { Bike } from '@/lib/types';
 import { formatGHS } from '@/lib/utils';
@@ -24,6 +25,7 @@ export default function AdminBikesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [editingBike, setEditingBike] = useState<Bike | null>(null);
 
   useEffect(() => {
     loadBikes();
@@ -248,13 +250,14 @@ export default function AdminBikesPage() {
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </Link>
-                        <Link
-                          href={`/admin/bikes/${bike.id}`}
+                        <button
+                          type="button"
+                          onClick={() => setEditingBike(bike)}
                           className="p-1.5 bg-[#1C1C1C] hover:bg-[#252525] text-gray-300 hover:text-white rounded-lg inline-block"
-                          title="Edit Model"
+                          title="Edit Model (Pop-up)"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
-                        </Link>
+                        </button>
                         {bike.stock_status !== 'sold_out' && (
                           <button
                             onClick={() => handleMarkSoldOut(bike)}
@@ -279,6 +282,17 @@ export default function AdminBikesPage() {
             </table>
           </div>
         </div>
+
+        {/* Full-Featured Edit Pop-up Modal */}
+        <EditBikeModal
+          bike={editingBike}
+          isOpen={Boolean(editingBike)}
+          onClose={() => setEditingBike(null)}
+          onSaved={(updated) => {
+            setBikes((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+            setActionFeedback(`Updated ${updated.model_name} specifications.`);
+          }}
+        />
       </div>
     </AdminLayout>
   );
